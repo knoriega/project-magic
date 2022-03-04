@@ -1,7 +1,6 @@
 import Phaser from "phaser"
 import { GameConfig } from "../consts/GameConfig"
-import { TextureKeys } from "../consts/TextureKeys"
-import Bullet, { BulletGroup } from "../weapons/Bullet"
+import { BulletGroup } from "../weapons/Bullet"
 
 enum GameObjectFactoryFunctions {
   Player = "player", // Generates faune object
@@ -47,27 +46,22 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
 
   update(cursors: Phaser.Types.Input.Keyboard.CursorKeys, delta: number) {
     // Reset velocity to account for case where no buttons are pushed
-    const scale = 2.5
-    this.setVelocity(GameConfig.MainSpeed, 0)
+    this.setVelocity(0, 0)
 
     if (cursors.down.isDown) {
       this.setVelocityY(
-        Math.sqrt(
-          (GameConfig.MainSpeed * scale) ** 2 - this.body.velocity.x ** 2
-        )
+        Math.sqrt(GameConfig.PlayerSpeed ** 2 - this.body.velocity.x ** 2)
       )
     } else if (cursors.up.isDown) {
       this.setVelocityY(
-        -Math.sqrt(
-          (GameConfig.MainSpeed * scale) ** 2 - this.body.velocity.x ** 2
-        )
+        -Math.sqrt(GameConfig.PlayerSpeed ** 2 - this.body.velocity.x ** 2)
       )
     }
 
     if (cursors.left.isDown) {
-      this.setVelocityX(-GameConfig.MainSpeed)
+      this.setVelocityX(-GameConfig.PlayerSpeed)
     } else if (cursors.right.isDown) {
-      this.setVelocityX(GameConfig.MainSpeed * scale)
+      this.setVelocityX(GameConfig.PlayerSpeed)
     }
 
     if (cursors.space.isDown) {
