@@ -1,6 +1,8 @@
 import Phaser from "phaser"
+import { CharacterData } from "../consts/CharacterDataKeys"
 import { GameConfig } from "../consts/GameConfig"
 import { BulletGroup } from "../weapons/Bullet"
+import Entity from "./Entity"
 
 enum GameObjectFactoryFunctions {
   Player = "player", // Generates faune object
@@ -23,7 +25,7 @@ declare global {
   }
 }
 
-export default class Player extends Phaser.Physics.Arcade.Sprite {
+export default class Player extends Entity {
   bullets: BulletGroup
   nextFire: number = 0
 
@@ -35,8 +37,8 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     frame?: string | number
   ) {
     super(scene, x, y, texture, frame)
-
     this.bullets = new BulletGroup(scene)
+    this.setData(CharacterData.Speed, GameConfig.PlayerSpeed)
   }
 
   /* Take bullet from pool and fire! */
@@ -44,24 +46,20 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.bullets.fire(this.x, this.y)
   }
 
-  update(cursors: Phaser.Types.Input.Keyboard.CursorKeys, delta: number) {
+  update(cursors: Phaser.Types.Input.Keyboard.CursorKeys) {
     // Reset velocity to account for case where no buttons are pushed
     this.setVelocity(0, 0)
 
     if (cursors.down.isDown) {
-      this.setVelocityY(
-        Math.sqrt(GameConfig.PlayerSpeed ** 2 - this.body.velocity.x ** 2)
-      )
+      this.moveDown()
     } else if (cursors.up.isDown) {
-      this.setVelocityY(
-        -Math.sqrt(GameConfig.PlayerSpeed ** 2 - this.body.velocity.x ** 2)
-      )
+      this.moveUp()
     }
 
     if (cursors.left.isDown) {
-      this.setVelocityX(-GameConfig.PlayerSpeed)
+      this.moveLeft()
     } else if (cursors.right.isDown) {
-      this.setVelocityX(GameConfig.PlayerSpeed)
+      this.moveRight()
     }
 
     if (cursors.space.isDown) {

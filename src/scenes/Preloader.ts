@@ -11,6 +11,7 @@ export default class Preloader extends Phaser.Scene {
     this.load.image(TextureKeys.Forest, "backgrounds/example_bkg2.png")
     this.load.image(TextureKeys.Snowflake, "characters/snowflake32x32.png")
     this.load.image(TextureKeys.Bullet, "weapons/snowflakeBullet32x32.png")
+    this.load.image(TextureKeys.Sun, "enemies/sun_enemy.png")
   }
 
   create() {
