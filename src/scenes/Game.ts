@@ -3,11 +3,15 @@ import { SceneKeys } from "../consts/SceneKeys"
 import { TextureKeys } from "../consts/TextureKeys"
 import "../characters/Player"
 import Sun from "../enemies/Sun"
+import Player from "../characters/Player"
+import Bullet from "../weapons/Bullet"
 
 export default class Game extends Phaser.Scene {
-  private background!: Phaser.GameObjects.TileSprite
+  private background1!: Phaser.GameObjects.TileSprite
+  private background2!: Phaser.GameObjects.TileSprite
+  private background3!: Phaser.GameObjects.TileSprite
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys
-  private player!: Phaser.Physics.Arcade.Sprite
+  private player!: Player
   private enemies!: Phaser.Physics.Arcade.Group
 
   constructor() {
@@ -18,8 +22,16 @@ export default class Game extends Phaser.Scene {
     const width = this.scale.width
     const height = this.scale.height
 
-    this.background = this.add
-      .tileSprite(0, 0, width, height, TextureKeys.Forest)
+    this.background1 = this.add
+      .tileSprite(0, 0, width, height, TextureKeys.Woods1)
+      .setOrigin(0, 0)
+
+    this.background2 = this.add
+      .tileSprite(0, 0, width, height, TextureKeys.Woods2)
+      .setOrigin(0, 0)
+
+    this.background3 = this.add
+      .tileSprite(0, 0, width, height, TextureKeys.Woods3)
       .setOrigin(0, 0)
 
     this.physics.world.setBounds(0, 0, width, height)
@@ -27,6 +39,14 @@ export default class Game extends Phaser.Scene {
     this.enemies = this.physics.add.group({
       classType: Sun,
     })
+
+    this.physics.add.overlap(
+      this.player.bullets,
+      this.enemies,
+      this.handleBulletEnemyOverlap,
+      undefined,
+      this
+    )
 
     const body = this.player.body as Phaser.Physics.Arcade.Body
     body.setCollideWorldBounds(true)
@@ -47,12 +67,28 @@ export default class Game extends Phaser.Scene {
     })
   }
 
+  handleBulletEnemyOverlap(
+    obj1: Phaser.GameObjects.GameObject,
+    obj2: Phaser.GameObjects.GameObject
+  ) {
+    const bullet = obj1 as Bullet
+    const enemy = obj2 as Sun
+    bullet.setVisible(false)
+    bullet.setActive(false)
+    bullet.body.enable = false
+
+    enemy.health -= 1
+  }
+
   preload() {
     this.cursors = this.input.keyboard.createCursorKeys()
   }
 
   update(time: number, delta: number) {
-    this.background.tilePositionX += 1
+    this.background1.tilePositionX += 0.1
+    this.background2.tilePositionX += 0.5
+    this.background3.tilePositionX += 1
     this.player.update(this.cursors)
+    this.enemies.getChildren().forEach((e) => e.update())
   }
 }

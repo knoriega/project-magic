@@ -1,6 +1,14 @@
 import { CharacterData } from "../consts/CharacterDataKeys"
 
+export enum States {
+  Alive,
+  Dead,
+}
+
 export default class Entity extends Phaser.Physics.Arcade.Sprite {
+  health!: number
+  state!: States
+
   constructor(
     scene: Phaser.Scene,
     x: number,
@@ -9,6 +17,7 @@ export default class Entity extends Phaser.Physics.Arcade.Sprite {
     frame?: string | number
   ) {
     super(scene, x, y, texture, frame)
+    this.state = States.Alive
   }
 
   moveUp() {

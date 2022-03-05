@@ -4,8 +4,10 @@ import Preloader from "./scenes/Preloader"
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
-  width: 467,
-  height: 267,
+  pixelArt: true,
+  title: "Project Magic",
+  width: 320,
+  height: 180,
   physics: {
     default: "arcade",
     arcade: {
@@ -14,6 +16,10 @@ const config: Phaser.Types.Core.GameConfig = {
     },
   },
   scene: [Preloader, Game],
+  scale: {
+    autoCenter: Phaser.Scale.CENTER_HORIZONTALLY,
+    zoom: 3,
+  },
 }
 
 export default new Phaser.Game(config)

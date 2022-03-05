@@ -26,6 +26,7 @@ declare global {
 }
 
 export default class Player extends Entity {
+  health = 3
   bullets: BulletGroup
   nextFire: number = 0
 
