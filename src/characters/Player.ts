@@ -2,7 +2,7 @@ import Phaser from "phaser"
 import { CharacterData } from "../consts/CharacterDataKeys"
 import { GameConfig } from "../consts/GameConfig"
 import { BulletGroup } from "../weapons/Bullet"
-import Entity from "./Entity"
+import Entity, { States } from "./Entity"
 
 enum GameObjectFactoryFunctions {
   Player = "player", // Generates faune object
@@ -29,6 +29,7 @@ export default class Player extends Entity {
   health = 3
   bullets: BulletGroup
   nextFire: number = 0
+  invincibilityTimer: number
 
   constructor(
     scene: Phaser.Scene,
@@ -40,6 +41,7 @@ export default class Player extends Entity {
     super(scene, x, y, texture, frame)
     this.bullets = new BulletGroup(scene)
     this.setData(CharacterData.Speed, GameConfig.PlayerSpeed)
+    this.invincibilityTimer = 3000
   }
 
   /* Take bullet from pool and fire! */
@@ -47,9 +49,46 @@ export default class Player extends Entity {
     this.bullets.fire(this.x, this.y)
   }
 
+  handleDamage() {
+    if (this.state == States.Dead || this.state == States.Damaged) return
+
+    --this.health
+    if (this.health <= 0) this.state = States.Dead
+    else {
+      this.invincibilityTimer = 1500
+      this.state = States.Damaged
+      this.setTint(0xff0000) // Red
+    }
+  }
+
+  preUpdate(time: number, delta: number): void {
+    switch (this.state) {
+      case States.Alive:
+        break
+
+      case States.Damaged:
+        this.invincibilityTimer -= delta
+        if (this.invincibilityTimer <= 0) {
+          this.state = States.Alive
+          this.setTint(0xffffff) // No tint
+        }
+        break
+
+      case States.Dead:
+        this.setTint(0x000000)
+        break
+    }
+  }
+
   update(cursors: Phaser.Types.Input.Keyboard.CursorKeys) {
     // Reset velocity to account for case where no buttons are pushed
     this.setVelocity(0, 0)
+    if (this.state == States.Dead) return
+
+    if (this.health <= 0) {
+      this.state = States.Dead
+      return
+    }
 
     if (cursors.down.isDown) {
       this.moveDown()
@@ -62,7 +101,6 @@ export default class Player extends Entity {
     } else if (cursors.right.isDown) {
       this.moveRight()
     }
-
     if (cursors.space.isDown) {
       this.fire()
     }

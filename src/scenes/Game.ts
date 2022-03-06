@@ -5,6 +5,7 @@ import "../characters/Player"
 import Sun from "../enemies/Sun"
 import Player from "../characters/Player"
 import Bullet from "../weapons/Bullet"
+import { States } from "../characters/Entity"
 
 export default class Game extends Phaser.Scene {
   private background1!: Phaser.GameObjects.TileSprite
@@ -36,14 +37,20 @@ export default class Game extends Phaser.Scene {
 
     this.physics.world.setBounds(0, 0, width, height)
     this.player = this.add.player(100, 100, TextureKeys.Snowflake)
-    this.enemies = this.physics.add.group({
-      classType: Sun,
-    })
+    this.enemies = this.physics.add.group()
 
     this.physics.add.overlap(
       this.player.bullets,
       this.enemies,
       this.handleBulletEnemyOverlap,
+      undefined,
+      this
+    )
+
+    this.physics.add.overlap(
+      this.player,
+      this.enemies,
+      this.handlePlayerEnemyOverlap,
       undefined,
       this
     )
@@ -65,6 +72,15 @@ export default class Game extends Phaser.Scene {
       callbackScope: this,
       loop: true,
     })
+  }
+  handlePlayerEnemyOverlap(
+    obj1: Phaser.GameObjects.GameObject,
+    obj2: Phaser.GameObjects.GameObject
+  ) {
+    const player = obj1 as Player
+    const enemy = obj2 as Sun
+    player.handleDamage()
+    enemy.health = 0 // Enemies destroyed on contact
   }
 
   handleBulletEnemyOverlap(
