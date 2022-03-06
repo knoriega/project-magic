@@ -1,3 +1,3 @@
 export enum GameConfig {
-  MainSpeed = 60,
+  PlayerSpeed = 120,
 }

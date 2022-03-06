@@ -6,14 +6,19 @@ export class BulletGroup extends Phaser.Physics.Arcade.Group {
   private fireRate: number = 200
 
   constructor(scene: Phaser.Scene) {
-    super(scene.physics.world, scene)
+    super(scene.physics.world, scene, {
+      createCallback: (go) => {
+        const bullet = go as Bullet
+        bullet.body.setSize(bullet.width / 2, bullet.height / 2)
+      },
+    })
 
     this.maxSize = 30
 
     /* Generate object pool */
     this.createMultiple({
       classType: Bullet,
-      quantity: 30,
+      quantity: 10,
       active: false,
       visible: false,
       key: TextureKeys.Bullet,
@@ -32,7 +37,7 @@ export class BulletGroup extends Phaser.Physics.Arcade.Group {
 }
 
 export default class Bullet extends Phaser.Physics.Arcade.Sprite {
-  private fireSpeed = 400
+  private fireSpeed = 250
 
   constructor(
     scene: Phaser.Scene,
@@ -46,6 +51,7 @@ export default class Bullet extends Phaser.Physics.Arcade.Sprite {
   fire() {
     this.setVisible(true)
     this.setActive(true)
+    this.body.enable = true
     this.setVelocityX(this.fireSpeed)
   }
 
