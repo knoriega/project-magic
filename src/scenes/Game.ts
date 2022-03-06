@@ -5,7 +5,6 @@ import "../characters/Player"
 import Sun from "../enemies/Sun"
 import Player from "../characters/Player"
 import Bullet from "../weapons/Bullet"
-import { States } from "../characters/Entity"
 
 export default class Game extends Phaser.Scene {
   private background1!: Phaser.GameObjects.TileSprite
@@ -47,12 +46,14 @@ export default class Game extends Phaser.Scene {
       this
     )
 
-    this.physics.add.overlap(
-      this.player,
-      this.enemies,
-      this.handlePlayerEnemyOverlap,
-      undefined,
-      this
+    this.player.colliders.push(
+      this.physics.add.overlap(
+        this.player,
+        this.enemies,
+        this.handlePlayerEnemyOverlap,
+        undefined,
+        this
+      )
     )
 
     const body = this.player.body as Phaser.Physics.Arcade.Body

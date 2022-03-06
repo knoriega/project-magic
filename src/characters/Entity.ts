@@ -9,6 +9,7 @@ export enum States {
 export default class Entity extends Phaser.Physics.Arcade.Sprite {
   health!: number
   state!: States
+  colliders: Phaser.Physics.Arcade.Collider[]
 
   constructor(
     scene: Phaser.Scene,
@@ -19,6 +20,7 @@ export default class Entity extends Phaser.Physics.Arcade.Sprite {
   ) {
     super(scene, x, y, texture, frame)
     this.state = States.Alive
+    this.colliders = []
   }
 
   moveUp() {

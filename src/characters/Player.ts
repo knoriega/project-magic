@@ -41,7 +41,7 @@ export default class Player extends Entity {
     super(scene, x, y, texture, frame)
     this.bullets = new BulletGroup(scene)
     this.setData(CharacterData.Speed, GameConfig.PlayerSpeed)
-    this.invincibilityTimer = 3000
+    this.invincibilityTimer = GameConfig.InvincibilityTimer
   }
 
   /* Take bullet from pool and fire! */
@@ -55,8 +55,17 @@ export default class Player extends Entity {
     --this.health
     if (this.health <= 0) this.state = States.Dead
     else {
-      this.invincibilityTimer = 1500
+      this.invincibilityTimer = GameConfig.InvincibilityTimer
       this.state = States.Damaged
+      this.colliders.forEach((c) => (c.active = false))
+      this.scene.add.tween({
+        targets: this,
+        alpha: 0,
+        yoyo: true,
+        ease: Phaser.Math.Easing.Stepped(1),
+        duration: 75,
+        repeat: 10,
+      })
       this.setTint(0xff0000) // Red
     }
   }
@@ -70,12 +79,14 @@ export default class Player extends Entity {
         this.invincibilityTimer -= delta
         if (this.invincibilityTimer <= 0) {
           this.state = States.Alive
+          this.colliders.forEach((c) => (c.active = true))
           this.setTint(0xffffff) // No tint
         }
         break
 
       case States.Dead:
         this.setTint(0x000000)
+        this.colliders.forEach((c) => (c.active = false))
         break
     }
   }
