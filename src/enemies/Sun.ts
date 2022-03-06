@@ -26,7 +26,9 @@ export default class Sun extends Entity {
   update() {
     switch (this.state) {
       case States.Alive:
-        if (this.health <= 0) this.state = States.Dead
+        if (this.health <= 0 || this.x <= -this.width) {
+          this.state = States.Dead
+        }
         break
 
       case States.Dead:
