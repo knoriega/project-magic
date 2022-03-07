@@ -5,6 +5,8 @@ import "../characters/Player"
 import Sun from "../enemies/Sun"
 import Player from "../characters/Player"
 import Bullet from "../weapons/Bullet"
+import { GameConfig } from "../consts/GameConfig"
+import { EventKeys, sceneEvents } from "../events/EventsCenter"
 
 export default class Game extends Phaser.Scene {
   private background1!: Phaser.GameObjects.TileSprite
@@ -19,22 +21,33 @@ export default class Game extends Phaser.Scene {
   }
 
   create() {
+    this.scene.run(SceneKeys.GameUi)
     const width = this.scale.width
     const height = this.scale.height
+    console.dir(this.physics.world.bounds)
+    this.physics.world.setBounds(
+      0,
+      GameConfig.UiMargin + 2,
+      width,
+      height - GameConfig.UiMargin * 2 - 4
+    )
+    console.dir(this.physics.world.bounds)
 
     this.background1 = this.add
-      .tileSprite(0, 0, width, height, TextureKeys.Woods1)
+      .tileSprite(0, GameConfig.UiMargin, width, height, TextureKeys.Woods1)
       .setOrigin(0, 0)
+      .setCrop(0, 0, 320, 180)
 
     this.background2 = this.add
-      .tileSprite(0, 0, width, height, TextureKeys.Woods2)
+      .tileSprite(0, GameConfig.UiMargin, width, height, TextureKeys.Woods2)
       .setOrigin(0, 0)
+      .setCrop(0, 0, 320, 180)
 
     this.background3 = this.add
-      .tileSprite(0, 0, width, height, TextureKeys.Woods3)
+      .tileSprite(0, GameConfig.UiMargin, width, height, TextureKeys.Woods3)
       .setOrigin(0, 0)
+      .setCrop(0, 0, 320, 180)
 
-    this.physics.world.setBounds(0, 0, width, height)
     this.player = this.add.player(100, 100, TextureKeys.Snowflake)
     this.enemies = this.physics.add.group()
 
@@ -65,7 +78,10 @@ export default class Game extends Phaser.Scene {
         const sun = new Sun(
           this,
           this.scale.width + 50,
-          Phaser.Math.Between(0, this.scale.height)
+          Phaser.Math.Between(
+            GameConfig.UiMargin + 10,
+            this.scale.height - GameConfig.UiMargin - 10
+          )
         )
         this.enemies.add(sun)
         sun.moveLeft()
@@ -82,6 +98,7 @@ export default class Game extends Phaser.Scene {
     const enemy = obj2 as Sun
     player.handleDamage()
     enemy.health = 0 // Enemies destroyed on contact
+    sceneEvents.emit(EventKeys.PlayerHealthChange, player.health)
   }
 
   handleBulletEnemyOverlap(
