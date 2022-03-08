@@ -1,5 +1,7 @@
 import Phaser from "phaser"
+import { GameConfig } from "./consts/GameConfig"
 import Game from "./scenes/Game"
+import GameUi from "./scenes/GameUi"
 import Preloader from "./scenes/Preloader"
 
 const config: Phaser.Types.Core.GameConfig = {
@@ -7,7 +9,7 @@ const config: Phaser.Types.Core.GameConfig = {
   pixelArt: true,
   title: "Project Magic",
   width: 320,
-  height: 180,
+  height: 180 + GameConfig.UiMargin * 2,
   physics: {
     default: "arcade",
     arcade: {
@@ -15,10 +17,10 @@ const config: Phaser.Types.Core.GameConfig = {
       // debug: true,
     },
   },
-  scene: [Preloader, Game],
+  scene: [Preloader, Game, GameUi],
   scale: {
     autoCenter: Phaser.Scale.CENTER_HORIZONTALLY,
-    zoom: 3,
+    zoom: 2.75,
   },
 }
 

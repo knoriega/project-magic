@@ -6,4 +6,5 @@ export enum TextureKeys {
   Woods1 = "woods-1",
   Woods2 = "woods-2",
   Woods3 = "woods-3",
+  PlayerFloat = "player-float",
 }
