@@ -7,6 +7,7 @@ import Player from "../characters/Player"
 import Bullet from "../weapons/Bullet"
 import { GameConfig } from "../consts/GameConfig"
 import { EventKeys, sceneEvents } from "../events/EventsCenter"
+import { createCharacterAnims } from "../anims/CharacterAnims"
 
 export default class Game extends Phaser.Scene {
   private background1!: Phaser.GameObjects.TileSprite
@@ -22,16 +23,16 @@ export default class Game extends Phaser.Scene {
 
   create() {
     this.scene.run(SceneKeys.GameUi)
+    createCharacterAnims(this.anims)
+
     const width = this.scale.width
     const height = this.scale.height
-    console.dir(this.physics.world.bounds)
     this.physics.world.setBounds(
       0,
       GameConfig.UiMargin + 2,
       width,
-      height - GameConfig.UiMargin * 2 - 4
+      height - GameConfig.UiMargin * 2 - 4,
     )
-    console.dir(this.physics.world.bounds)
 
     this.background1 = this.add
       .tileSprite(0, GameConfig.UiMargin, width, height, TextureKeys.Woods1)
@@ -48,7 +49,14 @@ export default class Game extends Phaser.Scene {
       .setOrigin(0, 0)
       .setCrop(0, 0, 320, 180)
 
-    this.player = this.add.player(100, 100, TextureKeys.Snowflake)
+    this.player = this.add.player(
+      100,
+      100,
+      TextureKeys.PlayerFloat,
+      "floatbase1.png",
+    )
+    console.dir(this.player.anims.currentAnim)
+
     this.enemies = this.physics.add.group()
 
     this.physics.add.overlap(
@@ -56,7 +64,7 @@ export default class Game extends Phaser.Scene {
       this.enemies,
       this.handleBulletEnemyOverlap,
       undefined,
-      this
+      this,
     )
 
     this.player.colliders.push(
@@ -65,12 +73,16 @@ export default class Game extends Phaser.Scene {
         this.enemies,
         this.handlePlayerEnemyOverlap,
         undefined,
-        this
-      )
+        this,
+      ),
     )
 
     const body = this.player.body as Phaser.Physics.Arcade.Body
+
+    /* Setting up hitbox for player */
     body.setCollideWorldBounds(true)
+    body.setSize(body.width, body.height / 3)
+    body.setOffset(20)
 
     this.time.addEvent({
       delay: 1000,
@@ -80,8 +92,8 @@ export default class Game extends Phaser.Scene {
           this.scale.width + 50,
           Phaser.Math.Between(
             GameConfig.UiMargin + 10,
-            this.scale.height - GameConfig.UiMargin - 10
-          )
+            this.scale.height - GameConfig.UiMargin - 10,
+          ),
         )
         this.enemies.add(sun)
         sun.moveLeft()
@@ -92,7 +104,7 @@ export default class Game extends Phaser.Scene {
   }
   handlePlayerEnemyOverlap(
     obj1: Phaser.GameObjects.GameObject,
-    obj2: Phaser.GameObjects.GameObject
+    obj2: Phaser.GameObjects.GameObject,
   ) {
     const player = obj1 as Player
     const enemy = obj2 as Sun
@@ -103,7 +115,7 @@ export default class Game extends Phaser.Scene {
 
   handleBulletEnemyOverlap(
     obj1: Phaser.GameObjects.GameObject,
-    obj2: Phaser.GameObjects.GameObject
+    obj2: Phaser.GameObjects.GameObject,
   ) {
     const bullet = obj1 as Bullet
     const enemy = obj2 as Sun

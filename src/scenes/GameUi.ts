@@ -1,5 +1,4 @@
 import Phaser from "phaser"
-import { GameConfig } from "../consts/GameConfig"
 import { SceneKeys } from "../consts/SceneKeys"
 import { EventKeys, sceneEvents } from "../events/EventsCenter"
 

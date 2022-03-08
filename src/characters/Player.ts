@@ -1,4 +1,5 @@
 import Phaser from "phaser"
+import { AnimationKeys } from "../consts/AnimationKeys"
 import { CharacterData } from "../consts/CharacterDataKeys"
 import { GameConfig } from "../consts/GameConfig"
 import { BulletGroup } from "../weapons/Bullet"
@@ -19,7 +20,7 @@ declare global {
         x: number,
         y: number,
         texture: string,
-        frame?: string | number
+        frame?: string | number,
       ): Player
     }
   }
@@ -36,7 +37,7 @@ export default class Player extends Entity {
     x: number,
     y: number,
     texture: string,
-    frame?: string | number
+    frame?: string | number,
   ) {
     super(scene, x, y, texture, frame)
     this.bullets = new BulletGroup(scene)
@@ -71,8 +72,10 @@ export default class Player extends Entity {
   }
 
   preUpdate(time: number, delta: number): void {
+    super.preUpdate(time, delta)
     switch (this.state) {
       case States.Alive:
+        if (this.health <= 0) this.state = States.Dead
         break
 
       case States.Damaged:
@@ -94,26 +97,35 @@ export default class Player extends Entity {
   update(cursors: Phaser.Types.Input.Keyboard.CursorKeys) {
     // Reset velocity to account for case where no buttons are pushed
     this.setVelocity(0, 0)
+    let animate: boolean
+
     if (this.state == States.Dead) return
 
-    if (this.health <= 0) {
-      this.state = States.Dead
-      return
+    if (Phaser.Input.Keyboard.JustDown(cursors.space)) {
+      this.play(AnimationKeys.PlayerFloatFire, true)
+    }
+    if (cursors.space.isDown) {
+      this.fire()
+      animate = false
+    } else {
+      this.play(AnimationKeys.PlayerFloatSide)
+      animate = true
     }
 
     if (cursors.down.isDown) {
+      if (animate) this.play(AnimationKeys.PlayerFloatDown)
       this.moveDown()
     } else if (cursors.up.isDown) {
+      if (animate) this.play(AnimationKeys.PlayerFloatUp)
       this.moveUp()
     }
 
     if (cursors.left.isDown) {
+      if (animate) this.play(AnimationKeys.PlayerFloatBack)
       this.moveLeft()
     } else if (cursors.right.isDown) {
+      if (animate) this.play(AnimationKeys.PlayerFloatSide)
       this.moveRight()
-    }
-    if (cursors.space.isDown) {
-      this.fire()
     }
   }
 }
@@ -128,18 +140,18 @@ Phaser.GameObjects.GameObjectFactory.register(
     x: number,
     y: number,
     texture: string,
-    frame?: string | number
+    frame?: string | number,
   ) {
     const sprite = new Player(this.scene, x, y, texture, frame)
     this.displayList.add(sprite)
     this.updateList.add(sprite)
     this.scene.physics.world.enableBody(
       sprite,
-      Phaser.Physics.Arcade.DYNAMIC_BODY
+      Phaser.Physics.Arcade.DYNAMIC_BODY,
     )
 
     sprite.body.setSize(sprite.width * 0.5, sprite.height * 0.8)
 
     return sprite
-  }
+  },
 )
