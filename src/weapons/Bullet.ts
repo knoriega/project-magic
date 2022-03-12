@@ -1,7 +1,11 @@
 import Phaser from "phaser"
 import { TextureKeys } from "../consts/TextureKeys"
 
-export class BulletGroup extends Phaser.Physics.Arcade.Group {
+export interface Weapon {
+  fire: (x: number, y: number) => void
+}
+
+export class BulletGroup extends Phaser.Physics.Arcade.Group implements Weapon {
   private nextFire: number = 0
   private fireRate: number = 200
 

@@ -2,6 +2,8 @@ import Phaser from "phaser"
 import { AnimationKeys } from "../consts/AnimationKeys"
 import { CharacterData } from "../consts/CharacterDataKeys"
 import { GameConfig } from "../consts/GameConfig"
+import { EventKeys, sceneEvents } from "../events/EventsCenter"
+import { Card } from "../ui/Cards"
 import { BulletGroup } from "../weapons/Bullet"
 import Entity, { States } from "./Entity"
 
@@ -31,6 +33,8 @@ export default class Player extends Entity {
   bullets: BulletGroup
   nextFire: number = 0
   invincibilityTimer: number
+  hand: Card[] = []
+  cardButtons: Phaser.Input.Keyboard.Key[] = []
 
   constructor(
     scene: Phaser.Scene,
@@ -43,6 +47,12 @@ export default class Player extends Entity {
     this.bullets = new BulletGroup(scene)
     this.setData(CharacterData.Speed, GameConfig.PlayerSpeed)
     this.invincibilityTimer = GameConfig.InvincibilityTimer
+    this.cardButtons = [
+      scene.input.keyboard.addKey("A"),
+      scene.input.keyboard.addKey("S"),
+      scene.input.keyboard.addKey("D"),
+      scene.input.keyboard.addKey("F"),
+    ]
   }
 
   /* Take bullet from pool and fire! */
@@ -127,6 +137,15 @@ export default class Player extends Entity {
       if (animate) this.play(AnimationKeys.PlayerFloatSide)
       this.moveRight()
     }
+
+    this.cardButtons.forEach((button, idx) => {
+      const card = this.hand[idx]
+      if (button.isDown && card && !card.used) {
+        card.weapon.fire(this.x, this.y)
+        card.used = true
+        sceneEvents.emit(EventKeys.PlayerUseCard, idx)
+      }
+    })
   }
 }
 
