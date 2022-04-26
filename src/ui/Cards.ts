@@ -28,12 +28,19 @@ export class Hand extends Phaser.GameObjects.Container {
     }
   }
 
-  /* Place card on screen and change texture */
+  /**
+   * Place card on screen and change texture
+   * @param card
+   * @param position
+   */
   setCard(card: Card, position: number) {
     this.cards[position].setVisible(true).setTexture(card.texture)
   }
 
-  /* Used card will vanish and set texture back to blank card */
+  /**
+   * Used card will vanish and set texture back to blank card
+   * @param position
+   */
   useCard(position: number) {
     this.cards[position].setVisible(false).setTexture(CardKeys.BlankCard)
   }

@@ -102,22 +102,33 @@ export default class Game extends Phaser.Scene {
       loop: true,
     })
 
-    /* Add card to hand */
+    /* Add cards to hand */
+    const playerDeck = Array.from({ length: 20 }, () => {
+      const possibleCards = [
+        {
+          texture: CardKeys.CardIceBeam,
+          weapon: { fire: () => console.log("Ice Beam!") },
+          used: false,
+        },
+        {
+          texture: CardKeys.CardFlamethrower,
+          weapon: { fire: () => console.log("Flamethrower!") },
+          used: false,
+        },
+      ]
+      return possibleCards[Phaser.Math.Between(0, 1)]
+    })
+
+    this.player.deck = playerDeck
     this.time.addEvent({
       delay: 3000,
       callback: () => {
-        for (let index = 0; index < 4; index++) {
-          const card = {
-            texture: CardKeys.CardIceBeam,
-            weapon: { fire: () => console.log("Ice Beam!") },
-            used: false,
-          }
-          this.player.hand.push(card)
-          sceneEvents.emit(EventKeys.PlayerAddCard, card, index)
-        }
+        this.player.drawCards(GameConfig.HandSize)
+        sceneEvents.emit(EventKeys.PlayerDeckChange, this.player.deck.length)
       },
     })
   }
+
   handlePlayerEnemyOverlap(
     obj1: Phaser.GameObjects.GameObject,
     obj2: Phaser.GameObjects.GameObject,

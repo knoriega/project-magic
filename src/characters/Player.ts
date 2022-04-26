@@ -32,8 +32,11 @@ export default class Player extends Entity {
   health = 3
   bullets: BulletGroup
   nextFire: number = 0
-  invincibilityTimer: number
+  invincibilityTimer = GameConfig.InvincibilityTimer
+  reloading = false
   hand: Card[] = []
+  deck: Card[] = []
+  discard: Card[] = []
   cardButtons: Phaser.Input.Keyboard.Key[] = []
 
   constructor(
@@ -46,7 +49,6 @@ export default class Player extends Entity {
     super(scene, x, y, texture, frame)
     this.bullets = new BulletGroup(scene)
     this.setData(CharacterData.Speed, GameConfig.PlayerSpeed)
-    this.invincibilityTimer = GameConfig.InvincibilityTimer
     this.cardButtons = [
       scene.input.keyboard.addKey("A"),
       scene.input.keyboard.addKey("S"),
@@ -58,6 +60,14 @@ export default class Player extends Entity {
   /* Take bullet from pool and fire! */
   fire() {
     this.bullets.fire(this.x, this.y)
+  }
+
+  drawCards(num: number) {
+    this.deck.splice(-num).forEach((card, idx) => {
+      this.hand.push(card)
+      sceneEvents.emit(EventKeys.PlayerAddCard, card, idx)
+    })
+    sceneEvents.emit(EventKeys.PlayerDeckChange, this.deck.length)
   }
 
   handleDamage() {
@@ -83,6 +93,8 @@ export default class Player extends Entity {
 
   preUpdate(time: number, delta: number): void {
     super.preUpdate(time, delta)
+    this.checkHandReload()
+
     switch (this.state) {
       case States.Alive:
         if (this.health <= 0) this.state = States.Dead
@@ -101,6 +113,37 @@ export default class Player extends Entity {
         this.setTint(0x000000)
         this.colliders.forEach((c) => (c.active = false))
         break
+    }
+  }
+
+  private checkHandReload() {
+    if (
+      this.hand.length &&
+      this.hand.every((card) => card.used) &&
+      !this.reloading
+    ) {
+      let reloadTime: number
+      this.reloading = true
+      this.discard.push(...this.hand.splice(-this.hand.length))
+
+      /* Shuffle discard into deck if needed*/
+      if (this.deck.length) {
+        reloadTime = GameConfig.ReloadTimer
+      } else {
+        reloadTime = GameConfig.ReloadTimer * 2
+        console.log("Shuffling discard into deck...")
+        ;[this.deck, this.discard] = [this.discard, this.deck]
+        Phaser.Utils.Array.Shuffle(this.deck)
+      }
+
+      sceneEvents.emit(EventKeys.PlayerReload, reloadTime)
+      this.scene.time.addEvent({
+        delay: reloadTime,
+        callback: () => {
+          this.drawCards(GameConfig.HandSize)
+          this.reloading = false
+        },
+      })
     }
   }
 
