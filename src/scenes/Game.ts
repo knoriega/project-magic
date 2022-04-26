@@ -8,6 +8,7 @@ import Bullet from "../weapons/Bullet"
 import { GameConfig } from "../consts/GameConfig"
 import { EventKeys, sceneEvents } from "../events/EventsCenter"
 import { createCharacterAnims } from "../anims/CharacterAnims"
+import { CardKeys } from "../consts/CardKeys"
 
 export default class Game extends Phaser.Scene {
   private background1!: Phaser.GameObjects.TileSprite
@@ -55,7 +56,6 @@ export default class Game extends Phaser.Scene {
       TextureKeys.PlayerFloat,
       "floatbase1.png",
     )
-    console.dir(this.player.anims.currentAnim)
 
     this.enemies = this.physics.add.group()
 
@@ -101,7 +101,34 @@ export default class Game extends Phaser.Scene {
       callbackScope: this,
       loop: true,
     })
+
+    /* Add cards to hand */
+    const playerDeck = Array.from({ length: 20 }, () => {
+      const possibleCards = [
+        {
+          texture: CardKeys.CardIceBeam,
+          weapon: { fire: () => console.log("Ice Beam!") },
+          used: false,
+        },
+        {
+          texture: CardKeys.CardFlamethrower,
+          weapon: { fire: () => console.log("Flamethrower!") },
+          used: false,
+        },
+      ]
+      return possibleCards[Phaser.Math.Between(0, 1)]
+    })
+
+    this.player.deck = playerDeck
+    this.time.addEvent({
+      delay: 3000,
+      callback: () => {
+        this.player.drawCards(GameConfig.HandSize)
+        sceneEvents.emit(EventKeys.PlayerDeckChange, this.player.deck.length)
+      },
+    })
   }
+
   handlePlayerEnemyOverlap(
     obj1: Phaser.GameObjects.GameObject,
     obj2: Phaser.GameObjects.GameObject,

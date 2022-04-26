@@ -1,9 +1,13 @@
 import Phaser from "phaser"
 import { TextureKeys } from "../consts/TextureKeys"
 
-export class BulletGroup extends Phaser.Physics.Arcade.Group {
-  private nextFire: number = 0
-  private fireRate: number = 200
+export interface Weapon {
+  fire: (x: number, y: number) => void
+}
+
+export class BulletGroup extends Phaser.Physics.Arcade.Group implements Weapon {
+  protected nextFire: number = 0
+  protected fireRate: number = 200
 
   constructor(scene: Phaser.Scene) {
     super(scene.physics.world, scene, {
@@ -43,9 +47,10 @@ export default class Bullet extends Phaser.Physics.Arcade.Sprite {
     scene: Phaser.Scene,
     x: number,
     y: number,
+    texture: string = TextureKeys.Bullet,
     frame?: string | number,
   ) {
-    super(scene, x, y, TextureKeys.Bullet, frame)
+    super(scene, x, y, texture, frame)
   }
 
   fire() {
